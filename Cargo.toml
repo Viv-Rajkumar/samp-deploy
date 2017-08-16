@@ -1,0 +1,6 @@
+[package]
+name = "samp"
+version = "0.1.0"
+authors = ["Viv-Rajkumar <viv.rajkumar@maidsafe.net>"]
+
+[dependencies]
