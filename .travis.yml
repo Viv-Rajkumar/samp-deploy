@@ -29,17 +29,17 @@ before_deploy:
   - bash cargo_install.sh cargo-config;
   - export LIB_VERSION=v$(cargo config package.version | tr -d '"')
   - cargo build --release
-  - if [ "${TRAVIS_OS_NAME}" = linux ]; then strip target/release/libsamp.so; fi
-  - zip target/deploy/libsamp-$LIB_VERSION-$TRAVIS_OS_NAME-x64.zip target/release/libsamp.so
-  - zip target/deploy/libsamp-mock-$LIB_VERSION-$TRAVIS_OS_NAME-x64.zip target/release/libsamp.so
+  - if [ "${TRAVIS_OS_NAME}" = linux ]; then export SUFFIX=so && strip target/release/libsamp.$SUFFIX; else export SUFFIX=dylib; fi
+  - zip target/deploy/samp-$LIB_VERSION-$TRAVIS_OS_NAME-x64.zip target/release/libsamp.$SUFFIX
+  - zip target/deploy/samp-mock-$LIB_VERSION-$TRAVIS_OS_NAME-x64.zip target/release/libsamp.$SUFFIX
   - if [ "${TRAVIS_OS_NAME}" = linux ]; then
       (
         set -x;
         rustup target add i686-unknown-linux-gnu &&
         cargo build --release --target=i686-unknown-linux-gnu &&
-        strip target/i686-unknown-linux-gnu/release/libsamp.so &&
-        zip target/deploy/libsamp-$LIB_VERSION-$TRAVIS_OS_NAME-x86.zip target/i686-unknown-linux-gnu/release/libsamp.so &&
-        zip target/deploy/libsamp-mock-$LIB_VERSION-$TRAVIS_OS_NAME-x86.zip target/i686-unknown-linux-gnu/release/libsamp.so;
+        strip target/i686-unknown-linux-gnu/release/libsamp.$SUFFIX &&
+        zip target/deploy/samp-$LIB_VERSION-$TRAVIS_OS_NAME-x86.zip target/i686-unknown-linux-gnu/release/libsamp.$SUFFIX &&
+        zip target/deploy/samp-mock-$LIB_VERSION-$TRAVIS_OS_NAME-x86.zip target/i686-unknown-linux-gnu/release/libsamp.$SUFFIX;
       )
     fi
 deploy:
