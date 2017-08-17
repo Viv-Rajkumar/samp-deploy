@@ -12,18 +12,23 @@ rust:
 sudo: false
 cache:
   cargo: true
+before_script:
+  - curl -sSL https://github.com/maidsafe/QA/raw/master/travis/cargo_install.sh > cargo_install.sh
 script:
-  - echo TRAVIS_COMMIT: ${TRAVIS_COMMIT}
-  - echo TRAVIS_COMMIT_MESSAGE: ${TRAVIS_COMMIT_MESSAGE}
-  - echo TRAVIS_EVENT_TYPE: ${TRAVIS_EVENT_TYPE}
-  - echo TRAVIS_PULL_REQUEST: ${TRAVIS_PULL_REQUEST}
-  - echo TRAVIS_PULL_REQUEST_SHA: ${TRAVIS_PULL_REQUEST_SHA}
+  - printf TRAVIS_COMMIT:%s\\n $TRAVIS_COMMIT
+  - printf TRAVIS_COMMIT_MESSAGE:%s\\n $TRAVIS_COMMIT_MESSAGE
+  - printf TRAVIS_EVENT_TYPE:%s\\n $TRAVIS_EVENT_TYPE
+  - printf TRAVIS_PULL_REQUEST:%s\\n $TRAVIS_PULL_REQUEST
+  - printf TRAVIS_PULL_REQUEST_SHA:%s\\n $TRAVIS_PULL_REQUEST_SHA
 before_deploy:
+  - bash cargo_install.sh cargo-config;
+  - export LIB_VERSION=$(cargo config package.version | tr -d '"')
+  - printf LIB_VERSION:%s\\n $LIB_VERSION
   - cargo build --release
   - mkdir -p target/deploy
   - strip target/release/libsamp.so
-  - zip target/deploy/libsamp-v0.0.1.zip target/release/libsamp.so
-  - zip target/deploy/libsamp-mock-v0.0.1.zip target/release/libsamp.so
+  - zip target/deploy/libsamp-v${LIB_VERSION}.zip target/release/libsamp.so
+  - zip target/deploy/libsamp-mock-v${LIB_VERSION}.zip target/release/libsamp.so
 deploy:
   provider: s3
   access_key_id: AKIAIA2TXTG7EV5VIG2Q
@@ -36,6 +41,8 @@ deploy:
   region: eu-west-2
   skip_cleanup: true
   on:
+    branch: master
+    tags: false
     condition: -n "${TRAVIS_PULL_REQUEST_SHA}"
     rust: 1.19.0
 after_deploy: rm -rf target/deploy
