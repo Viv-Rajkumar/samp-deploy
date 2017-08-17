@@ -35,9 +35,9 @@ build_script:
     cargo check --verbose --release --lib --tests
 
 before_deploy:
+  - cargo build --verbose --release
   - ps: |
-        cargo build --verbose --release
-        $LIB_VERSION = (cargo pkgid) -replace '.*[:#](.*)', '$1'
+        $LIB_VERSION = (cargo pkgid) -Replace '.*[:#](.*)', '$1'
         Push-AppveyorArtifact target\release\samp.dll -FileName samp-$LIB_VERSION-win-$PLATFORM.zip
         Push-AppveyorArtifact target\release\samp.dll -FileName samp-mock-$LIB_VERSION-win-$PLATFORM.zip
 
