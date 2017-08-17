@@ -15,6 +15,7 @@ cache:
 script:
   - tar --version || true
   - zip --version || true
+  - echo TRAVIS_COMMIT: ${TRAVIS_COMMIT}
   - echo TRAVIS_COMMIT_MESSAGE: ${TRAVIS_COMMIT_MESSAGE}
   - echo TRAVIS_EVENT_TYPE: ${TRAVIS_EVENT_TYPE}
   - echo TRAVIS_PULL_REQUEST: ${TRAVIS_PULL_REQUEST}
