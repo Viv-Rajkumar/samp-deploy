@@ -19,12 +19,6 @@ cache:
 before_script:
   - curl -sSL https://github.com/maidsafe/QA/raw/master/travis/cargo_install.sh > cargo_install.sh
 script:
-  - if [ "${TRAVIS_OS_NAME}" = linux ]; then
-      (
-        set -x;
-        rustup target add i686-unknown-linux-gnu
-      )
-    fi
   - printf TRAVIS_COMMIT:%s\\n $TRAVIS_COMMIT
   - printf TRAVIS_COMMIT_MESSAGE:%s\\n $TRAVIS_COMMIT_MESSAGE
   - printf TRAVIS_EVENT_TYPE:%s\\n $TRAVIS_EVENT_TYPE
@@ -35,18 +29,17 @@ before_deploy:
   - bash cargo_install.sh cargo-config;
   - export LIB_VERSION=v$(cargo config package.version | tr -d '"')
   - cargo build --release
-  - strip target/release/libsamp.so
-  - zip target/deploy/libsamp-v$LIB_VERSION-$TRAVIS_OS_NAME-x64.zip target/release/libsamp.so
+  - if [ "${TRAVIS_OS_NAME}" = linux ]; then strip target/release/libsamp.so; fi
+  - zip target/deploy/libsamp-$LIB_VERSION-$TRAVIS_OS_NAME-x64.zip target/release/libsamp.so
   - zip target/deploy/libsamp-mock-$LIB_VERSION-$TRAVIS_OS_NAME-x64.zip target/release/libsamp.so
   - if [ "${TRAVIS_OS_NAME}" = linux ]; then
       (
         set -x;
-        ls -la target/release &&
+        rustup target add i686-unknown-linux-gnu &&
         cargo build --release --target=i686-unknown-linux-gnu &&
-        ls -la target/release &&
-        strip target/release/libsamp.so &&
-        zip target/deploy/libsamp-v$LIB_VERSION-$TRAVIS_OS_NAME-x86.zip target/release/libsamp.so &&
-        zip target/deploy/libsamp-mock-$LIB_VERSION-$TRAVIS_OS_NAME-x86.zip target/release/libsamp.so;
+        strip target/i686-unknown-linux-gnu/release/libsamp.so &&
+        zip target/deploy/libsamp-$LIB_VERSION-$TRAVIS_OS_NAME-x86.zip target/i686-unknown-linux-gnu/release/libsamp.so &&
+        zip target/deploy/libsamp-mock-$LIB_VERSION-$TRAVIS_OS_NAME-x86.zip target/i686-unknown-linux-gnu/release/libsamp.so;
       )
     fi
 deploy:
