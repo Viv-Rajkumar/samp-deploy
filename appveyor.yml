@@ -45,7 +45,7 @@ deploy:
   provider: S3
   access_key_id: AKIAIA2TXTG7EV5VIG2Q
   secret_access_key:
-    secure: piiybrNtxz8cwySzb8SUfRTgbd4bgH
+    secure: bj+Mv0HEJazcY+q3Lt16Ui/PjJwTO8GNRAmsZeOO4GYG2LJyhCqpNja1zrs0LHcv
   bucket: samp-deploy
   region: eu-west-2
   folder: $(APPVEYOR_REPO_COMMIT)
