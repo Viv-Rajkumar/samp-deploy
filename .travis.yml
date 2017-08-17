@@ -15,25 +15,41 @@ cache:
 before_script:
   - curl -sSL https://github.com/maidsafe/QA/raw/master/travis/cargo_install.sh > cargo_install.sh
 script:
+  - if [ "${TRAVIS_OS_NAME}" = linux ]; then
+      (
+        set -x;
+        rustup target add i686-unknown-linux-gnu
+      )
+    fi
   - printf TRAVIS_COMMIT:%s\\n $TRAVIS_COMMIT
   - printf TRAVIS_COMMIT_MESSAGE:%s\\n $TRAVIS_COMMIT_MESSAGE
   - printf TRAVIS_EVENT_TYPE:%s\\n $TRAVIS_EVENT_TYPE
   - printf TRAVIS_PULL_REQUEST:%s\\n $TRAVIS_PULL_REQUEST
   - printf TRAVIS_PULL_REQUEST_SHA:%s\\n $TRAVIS_PULL_REQUEST_SHA
 before_deploy:
-  - bash cargo_install.sh cargo-config;
-  - export LIB_VERSION=$(cargo config package.version | tr -d '"')
-  - printf LIB_VERSION:%s\\n $LIB_VERSION
-  - cargo build --release
   - mkdir -p target/deploy
+  - bash cargo_install.sh cargo-config;
+  - export LIB_VERSION=v$(cargo config package.version | tr -d '"')
+  - cargo build --release
   - strip target/release/libsamp.so
-  - zip target/deploy/libsamp-v$LIB_VERSION.zip target/release/libsamp.so
-  - zip target/deploy/libsamp-mock-v$LIB_VERSION.zip target/release/libsamp.so
+  - zip target/deploy/libsamp-v$LIB_VERSION-$TRAVIS_OS_NAME-x64.zip target/release/libsamp.so
+  - zip target/deploy/libsamp-mock-$LIB_VERSION-$TRAVIS_OS_NAME-x64.zip target/release/libsamp.so
+  - if [ "${TRAVIS_OS_NAME}" = linux ]; then
+      (
+        set -x;
+        ls -la target/release
+        cargo build --release --target=i686-unknown-linux-gnu
+        ls -la target/release
+        strip target/release/libsamp.so
+        zip target/deploy/libsamp-v$LIB_VERSION-$TRAVIS_OS_NAME-x86.zip target/release/libsamp.so
+        zip target/deploy/libsamp-mock-$LIB_VERSION-$TRAVIS_OS_NAME-x86.zip target/release/libsamp.so
+      )
+    fi
 deploy:
   provider: s3
   access_key_id: AKIAIA2TXTG7EV5VIG2Q
   secret_access_key:
-    secure: qEDay6TCAy3tBLqLYFOx9OjAdoRl010paK2//teFETfwUfJA/RtNSfkp1yrgx+kZ3FO8cthdDnwR3zjM3pkCL+5mGkQMAgvRY7rcEB5H1VyO4jkZRoB4n/yUu5jB4dHdeeRWTOJxNOOPA0G1Q65LLkJql2JGoJatqE3pBmJm0X8=
+    secure: piiybrNtxz8cwySzb8SUfRTgbd4bgHRHkAb4HOoHSbLSXd9empYC6/a2cArrpNTaZOsNeJzMpHamcbTmNW0yVzCx9FyBxmY+IarDWj9V9C/T4W6FOzD6A/4QJA8a2grqOZuOSeM5DlBHlnu1MKLLuz9AVre7jgyXN+N6RQ0/wZMLqfbIUMfKMrUvvQQ09Dx+zG0qmzuH10Xv7cuvP/yUQ1gBFFzXXrq896FVDcF/64UB8q5sQGc29P2MpSmSpFYBw+q3FBkCTizFjTm2JHBN+NtLXPTmVMq/2TC00W16lQ1NHQV04bni7aPKtYwGOxW0j7AWh6RlHsh+AAjBKMGyn2IJ8+JmsHtTVltGe4U3qbXle6QqML6j/Ik55M0WDyPpuPk5OfObWrvS9aB62oBXaP2LIg3QQnijL0P85QRXrwN0igtAHtJMqHsz8TBCcM8iYEyocvlv5GR1iDADOQvSkM5QfzwvqPCSDwsovJcwouLS1mQgdn1CDo/KyPFRRnw3z0CTdQFBCtvhaUA/uhuOpXTeCSWBV/NIe2/sGgo5Lf8Jl3ukR6ry22jfcdW8KkE9FcksQOMiElcG9iouXhYf5N0WOqscYaDUJHxF3otqgHgB51vHkIX5U02hV26rO/GDulu44Lgc6ndJD4RcZ+jMOC/DuXuK9yKH0LpZ79CNgPM=
   bucket: samp-deploy
   local-dir: target/deploy
   upload-dir: $TRAVIS_COMMIT
