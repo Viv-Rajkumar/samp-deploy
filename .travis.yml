@@ -16,8 +16,6 @@ rust:
 sudo: false
 cache:
   cargo: true
-before_script:
-  - curl -sSL https://github.com/maidsafe/QA/raw/master/travis/cargo_install.sh > cargo_install.sh
 script:
   - printf TRAVIS_COMMIT:%s\\n $TRAVIS_COMMIT
   - printf TRAVIS_COMMIT_MESSAGE:%s\\n $TRAVIS_COMMIT_MESSAGE
@@ -26,8 +24,7 @@ script:
   - printf TRAVIS_PULL_REQUEST_SHA:%s\\n $TRAVIS_PULL_REQUEST_SHA
 before_deploy:
   - mkdir -p target/deploy
-  - bash cargo_install.sh cargo-config;
-  - export LIB_VERSION=v$(cargo config package.version | tr -d '"')
+  - export LIB_VERSION=v$(cargo pkgid | sed -e "s/.*[:#]\(.*\)/\1/")
   - cargo build --release
   - if [ "${TRAVIS_OS_NAME}" = linux ]; then export SUFFIX=so && strip target/release/libsamp.$SUFFIX; else export SUFFIX=dylib; fi
   - zip target/deploy/samp-$LIB_VERSION-$TRAVIS_OS_NAME-x64.zip target/release/libsamp.$SUFFIX

@@ -35,11 +35,11 @@ build_script:
     cargo check --verbose --release --lib --tests
 
 before_deploy:
-  - ps: >-
-    cargo build --verbose --release
-    $LIB_VERSION = 0.1.0
-    Push-AppveyorArtifact target\release\samp.dll -FileName samp-$LIB_VERSION)-win-$PLATFORM.zip
-    Push-AppveyorArtifact target\release\samp.dll -FileName samp-mock-$LIB_VERSION-win-$PLATFORM.zip
+  - ps: |
+        cargo build --verbose --release
+        $LIB_VERSION = (cargo pkgid) -replace '.*[:#](.*)', '$1'
+        Push-AppveyorArtifact target\release\samp.dll -FileName samp-$LIB_VERSION)-win-$PLATFORM.zip
+        Push-AppveyorArtifact target\release\samp.dll -FileName samp-mock-$LIB_VERSION-win-$PLATFORM.zip
 
 deploy:
   provider: S3
