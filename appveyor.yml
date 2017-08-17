@@ -38,7 +38,7 @@ before_deploy:
   - ps: |
         cargo build --verbose --release
         $LIB_VERSION = (cargo pkgid) -replace '.*[:#](.*)', '$1'
-        Push-AppveyorArtifact target\release\samp.dll -FileName samp-$LIB_VERSION)-win-$PLATFORM.zip
+        Push-AppveyorArtifact target\release\samp.dll -FileName samp-$LIB_VERSION-win-$PLATFORM.zip
         Push-AppveyorArtifact target\release\samp.dll -FileName samp-mock-$LIB_VERSION-win-$PLATFORM.zip
 
 deploy:
