@@ -27,8 +27,8 @@ before_deploy:
   - cargo build --release
   - mkdir -p target/deploy
   - strip target/release/libsamp.so
-  - zip target/deploy/libsamp-v${LIB_VERSION}.zip target/release/libsamp.so
-  - zip target/deploy/libsamp-mock-v${LIB_VERSION}.zip target/release/libsamp.so
+  - zip target/deploy/libsamp-v$LIB_VERSION.zip target/release/libsamp.so
+  - zip target/deploy/libsamp-mock-v$LIB_VERSION.zip target/release/libsamp.so
 deploy:
   provider: s3
   access_key_id: AKIAIA2TXTG7EV5VIG2Q
@@ -36,13 +36,13 @@ deploy:
     secure: qEDay6TCAy3tBLqLYFOx9OjAdoRl010paK2//teFETfwUfJA/RtNSfkp1yrgx+kZ3FO8cthdDnwR3zjM3pkCL+5mGkQMAgvRY7rcEB5H1VyO4jkZRoB4n/yUu5jB4dHdeeRWTOJxNOOPA0G1Q65LLkJql2JGoJatqE3pBmJm0X8=
   bucket: samp-deploy
   local-dir: target/deploy
-  upload-dir: $TRAVIS_PULL_REQUEST_SHA
+  upload-dir: $TRAVIS_COMMIT
   acl: public_read
   region: eu-west-2
   skip_cleanup: true
   on:
     branch: master
     tags: false
-    condition: -n "${TRAVIS_PULL_REQUEST_SHA}"
+    condition: "$TRAVIS_EVENT_TYPE = push"
     rust: 1.19.0
 after_deploy: rm -rf target/deploy
