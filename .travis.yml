@@ -37,12 +37,12 @@ before_deploy:
   - if [ "${TRAVIS_OS_NAME}" = linux ]; then
       (
         set -x;
-        ls -la target/release
-        cargo build --release --target=i686-unknown-linux-gnu
-        ls -la target/release
-        strip target/release/libsamp.so
-        zip target/deploy/libsamp-v$LIB_VERSION-$TRAVIS_OS_NAME-x86.zip target/release/libsamp.so
-        zip target/deploy/libsamp-mock-$LIB_VERSION-$TRAVIS_OS_NAME-x86.zip target/release/libsamp.so
+        ls -la target/release &&
+        cargo build --release --target=i686-unknown-linux-gnu &&
+        ls -la target/release &&
+        strip target/release/libsamp.so &&
+        zip target/deploy/libsamp-v$LIB_VERSION-$TRAVIS_OS_NAME-x86.zip target/release/libsamp.so &&
+        zip target/deploy/libsamp-mock-$LIB_VERSION-$TRAVIS_OS_NAME-x86.zip target/release/libsamp.so;
       )
     fi
 deploy:
