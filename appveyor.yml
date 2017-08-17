@@ -1,0 +1,55 @@
+environment:
+  global:
+    RUST_BACKTRACE: 1
+    SAFE_MEMORY_STORE: 1
+  matrix:
+    - RUST_TOOLCHAIN: 1.19.0
+
+cache:
+  - '%USERPROFILE%\.cargo'
+  - '%APPVEYOR_BUILD_FOLDER%\target'
+
+clone_depth: 1
+
+install:
+  - ps: |
+        $url = "https://github.com/maidsafe/QA/raw/master/appveyor/install_rustup.ps1"
+        Invoke-WebRequest $url -OutFile "install_rustup.ps1"
+        . ".\install_rustup.ps1"
+
+platform:
+  - x86
+  - x64
+
+configuration:
+  - Release
+
+branches:
+  only:
+    - master
+
+skip_tags: true
+
+build_script:
+  - |-
+    cargo check --verbose --release --lib --tests
+
+before_deploy:
+  - ps: >-
+    cargo build --verbose --release
+    $LIB_VERSION = 0.1.0
+    Push-AppveyorArtifact target\release\samp.dll -FileName samp-$LIB_VERSION)-win-$PLATFORM.zip
+    Push-AppveyorArtifact target\release\samp.dll -FileName samp-mock-$LIB_VERSION-win-$PLATFORM.zip
+
+deploy:
+  provider: S3
+  access_key_id: AKIAIA2TXTG7EV5VIG2Q
+  secret_access_key:
+    secure: piiybrNtxz8cwySzb8SUfRTgbd4bgH
+  bucket: samp-deploy
+  region: eu-west-2
+  folder: $(APPVEYOR_REPO_COMMIT)
+  artifact: /.*\.zip/
+  on:
+    APPVEYOR_REPO_TAG: false
+    RUST_TOOLCHAIN: 1.19.0
